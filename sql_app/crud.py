@@ -1,36 +1,56 @@
-from sqlalchemy.orm import Session
-
-from . import models, schemas
-
-
-def get_user(db: Session, user_id: int):
-    return db.query(models.User).filter(models.User.id == user_id).first()
+# dicionários para armazenar dados temporários
+from .database import users_db, user_id_counter, items_db, item_id_counter
 
 
-def get_user_by_email(db: Session, email: str):
-    return db.query(models.User).filter(models.User.email == email).first()
+def get_user(user_id: int):
+    if user_id < 0 or user_id > len(users_db):
+        raise ValueError("User ID is out of range")
+
+    # Se users_db for um dicionário
+    if user_id not in users_db:
+        raise ValueError("User not found")
+
+    return users_db[user_id]
 
 
-def get_users(db: Session, skip: int = 0, limit: int = 100):
-    return db.query(models.User).offset(skip).limit(limit).all()
+def get_user_by_email(email: str):
+    for user in users_db.values():
+        if user["email"] == email:
+            return user
+    return None
 
 
-def create_user(db: Session, user: schemas.UserCreate):
-    fake_hashed_password = user.password + "notreallyhashed"
-    db_user = models.User(email=user.email, hashed_password=fake_hashed_password)
-    db.add(db_user)
-    db.commit()
-    db.refresh(db_user)
-    return db_user
+def get_users(skip: int = 0, limit: int = 100):
+    return list(users_db.values())[skip : skip + limit]
 
 
-def get_items(db: Session, skip: int = 0, limit: int = 100):
-    return db.query(models.Item).offset(skip).limit(limit).all()
+def create_user(user: dict):
+    global user_id_counter
+    new_user = {
+        "id": user_id_counter,
+        "email": user["email"],
+        "hashed_password": user["password"] + "notreallyhashed",
+        "is_active": True,
+        "items": [],
+    }
+    users_db[user_id_counter] = new_user
+    user_id_counter += 1
+    return new_user
 
 
-def create_user_item(db: Session, item: schemas.ItemCreate, user_id: int):
-    db_item = models.Item(**item.dict(), owner_id=user_id)
-    db.add(db_item)
-    db.commit()
-    db.refresh(db_item)
-    return db_item
+def get_items(skip: int = 0, limit: int = 100):
+    return list(items_db.values())[skip : skip + limit]
+
+
+def create_user_item(user_id: int, item: dict):
+    global item_id_counter
+    new_item = {
+        "id": item_id_counter,
+        "title": item["title"],
+        "description": item.get("description", None),
+        "owner_id": user_id,
+    }
+    items_db[item_id_counter] = new_item
+    users_db[user_id]["items"].append(new_item)
+    item_id_counter += 1
+    return new_item
