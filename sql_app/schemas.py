@@ -34,3 +34,39 @@ class User(UserBase):
 
     class Config:
         from_attributes = True
+class EventoBase(BaseModel):
+    nome: str
+    data: str
+    hora: str
+    local_id: list[int]
+    tipo_id: list[int]
+class EventoCreate(EventoBase):
+    pass
+class Evento(EventoBase):
+    id: int
+    class Config:
+        from_attributes = True
+class TipoBase(BaseModel):
+    nome: str
+    descricao: str
+    publico_alvo: str
+    evento_id: list[int]
+class TipoCreate(TipoBase):
+    pass
+class Tipo(TipoBase):
+    id: int
+    evento_id: list[int]
+    class Config:
+        from_attributes = True
+class LocalBase(BaseModel):
+    nome: str
+    endereco: str
+    capacidade: int
+    evento_id: list[int]
+class LocalCreate(LocalBase):
+    pass
+class Local(LocalBase):
+    id: int
+    evento_id: list[int]
+    class Config:
+        from_attributes = True
