@@ -1,10 +1,9 @@
-# Arquivo para a criação dos schemas das estruturas que serão usadas
-
 from pydantic import BaseModel, Field
 from typing import Optional
 from datetime import date, time
 
-
+########## Evento ##########
+# Modelo base para os dados de evento
 class EventoBase(BaseModel):
     nome: str = Field(title="nome", description="Nome do evento", example="Tech Talk")
     descricao: str = Field(
@@ -13,14 +12,14 @@ class EventoBase(BaseModel):
         example="Discussões sobre tendências tecnológicas",
     )
     data: date = Field(
-        title="data", description="Data de ínico do evento", example="2024-11-15"
+        title="data", description="Data de início do evento", example="2024-11-15"
     )
     ehFormal: bool = Field(
         title="ehFormal", description="O evento é formal ou não", example=True
     )
     custoIngresso: int = Field(
         title="custoIngresso",
-        description="Preço do ticket medio do ingresso",
+        description="Preço do ticket médio do ingresso",
         example=100,
     )
     contato: str = Field(
@@ -34,23 +33,24 @@ class EventoBase(BaseModel):
     )
     local_id: list[int] = Field(
         title="local_id",
-        description="Locais em que o evento vai ocorrer",
+        description="IDs dos locais em que o evento vai ocorrer",
         example=[1, 2, 3],
     )
-    tipo_id: int = Field(title="tipo_id", description="do evento ", example=1)
+    tipo_id: int = Field(title="tipo_id", description="ID do tipo de evento", example=1)
 
-
+# Modelo para criação de um novo evento, que herda de EventoBase
 class EventoCreate(EventoBase):
     pass
 
-
+# Modelo para representar um evento completo, com o campo 'id' incluído
 class Evento(EventoBase):
     id: int
 
+    # Configuração para permitir mapeamento de atributos diretamente de um ORM
     class Config:
         from_attributes = True
 
-
+# Modelo para atualizar um evento, com todos os campos opcionais
 class EventoUpdate(BaseModel):
     nome: Optional[str] = None
     descricao: Optional[str] = None
@@ -63,7 +63,8 @@ class EventoUpdate(BaseModel):
     local_id: Optional[list[int]] = None
     tipo_id: Optional[int] = None
 
-
+########## Tipo ##########
+# Modelo base para os dados de tipo de evento
 class TipoBase(BaseModel):
     nome: str = Field(
         title="nome", description="Nome do tipo de evento", example="Palestra"
@@ -89,18 +90,19 @@ class TipoBase(BaseModel):
         example=True,
     )
 
-
+# Modelo para criação de um novo tipo de evento, que herda de TipoBase
 class TipoCreate(TipoBase):
     pass
 
-
+# Modelo para representar um tipo de evento completo, com o campo 'id' incluído
 class Tipo(TipoBase):
     id: int
 
+    # Configuração para permitir mapeamento de atributos diretamente de um ORM
     class Config:
         from_attributes = True
 
-
+# Modelo para atualizar um tipo de evento, com todos os campos opcionais
 class TipoUpdate(BaseModel):
     nome: Optional[str] = None
     descricao: Optional[str] = None
@@ -108,7 +110,8 @@ class TipoUpdate(BaseModel):
     objetivo: Optional[str] = None
     ehPresencial: Optional[int] = None
 
-
+########## Local ##########
+# Modelo base para os dados de um local de evento
 class LocalBase(BaseModel):
     nome: str = Field(
         title="nome", description="Nome do local", example="Centro de Convenções"
@@ -131,7 +134,7 @@ class LocalBase(BaseModel):
     )
     acessibilidade: bool = Field(
         title="acessibilidade",
-        description="Indica se o local é acessível",
+        description="Indica se o local possui acessibilidade",
         example=True,
     )
     event_id: list[int] = Field(
@@ -140,18 +143,19 @@ class LocalBase(BaseModel):
         example=[1, 2, 3],
     )
 
-
+# Modelo para criação de um novo local, que herda de LocalBase
 class LocalCreate(LocalBase):
     pass
 
-
+# Modelo para representar um local completo, com o campo 'id' incluído
 class Local(LocalBase):
     id: int
 
+    # Configuração para permitir mapeamento de atributos diretamente de um ORM
     class Config:
         from_attributes = True
 
-
+# Modelo para atualizar um local, com todos os campos opcionais
 class LocalUpdate(BaseModel):
     nome: Optional[str] = None
     endereco: Optional[str] = None
