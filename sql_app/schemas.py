@@ -2,12 +2,18 @@
 
 from pydantic import BaseModel
 from typing import Optional
-from datetime import date
+from datetime import date, time
 
 
 class EventoBase(BaseModel):
     nome: str
+    descricao: str
     data: date
+    ehFormal: bool
+    custoIngresso: int
+    contato: str
+    horaInicio: time
+    horaFim: time
     local_id: list[int]
     tipo_id: list[int]
 
@@ -25,7 +31,13 @@ class Evento(EventoBase):
 
 class EventoUpdate(BaseModel):
     nome: Optional[str] = None
+    descricao: Optional[str] = None
     data: Optional[date] = None
+    ehFormal: Optional[bool] = None
+    custoIngresso: Optional[int] = None
+    contato: Optional[str] = None
+    horaInicio: Optional[time] = None
+    horaFim: Optional[time] = None
     local_id: Optional[list[int]] = None
     tipo_id: Optional[list[int]] = None
 
@@ -34,7 +46,8 @@ class TipoBase(BaseModel):
     nome: str
     descricao: str
     publico_alvo: str
-    evento_id: list[int]
+    objetivo: str
+    ehPresencial: int
 
 
 class TipoCreate(TipoBase):
@@ -43,7 +56,6 @@ class TipoCreate(TipoBase):
 
 class Tipo(TipoBase):
     id: int
-    evento_id: list[int]
 
     class Config:
         from_attributes = True
@@ -53,14 +65,18 @@ class TipoUpdate(BaseModel):
     nome: Optional[str] = None
     descricao: Optional[str] = None
     publico_alvo: Optional[str] = None
-    evento_id: Optional[list[int]] = None
+    objetivo: Optional[str] = None
+    ehPresencial: Optional[int] = None
 
 
 class LocalBase(BaseModel):
     nome: str
     endereco: str
     capacidade: int
-    evento_id: list[int]
+    telefone: str
+    temEstacionamento: bool
+    acessibilidade: bool
+    event_id: list[int]
 
 
 class LocalCreate(LocalBase):
@@ -69,7 +85,6 @@ class LocalCreate(LocalBase):
 
 class Local(LocalBase):
     id: int
-    evento_id: list[int]
 
     class Config:
         from_attributes = True
@@ -79,4 +94,7 @@ class LocalUpdate(BaseModel):
     nome: Optional[str] = None
     endereco: Optional[str] = None
     capacidade: Optional[int] = None
-    evento_id: Optional[list[int]] = None
+    telefone: Optional[str] = None
+    temEstacionamento: Optional[bool] = None
+    acessibilidade: Optional[bool] = None
+    event_id: Optional[list[int]] = None
