@@ -104,7 +104,7 @@ def create_tipo(tipo: dict):
         "descricao": tipo["descricao"],
         "publico_alvo": tipo["publico_alvo"],
         "objetivo": tipo["objetivo"],
-        "ehPresencial": tipo["ehPrecencial"],
+        "ehPresencial": tipo["ehPresencial"],
     }
     tipo_db[tipo_id_counter] = new_tipo
     tipo_id_counter += 1

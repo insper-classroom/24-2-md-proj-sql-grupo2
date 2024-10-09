@@ -56,7 +56,7 @@ evento_db = {
         "horaInicio": "10:00",
         "horaFim": "12:00",
         "local_id": [1],
-        "tipo_id": [1],
+        "tipo_id": 1,
     },
     2: {
         "id": 2,
@@ -69,7 +69,7 @@ evento_db = {
         "horaInicio": "14:00",
         "horaFim": "17:00",
         "local_id": [2],
-        "tipo_id": [2],
+        "tipo_id": 2,
     },
 }
 
