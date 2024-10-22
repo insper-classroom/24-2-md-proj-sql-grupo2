@@ -4,6 +4,7 @@ from . import models, schemas
 
 ################################################################ READ ################################################################
 
+
 # Retorna o evento de ID especificado:
 def get_evento(db: Session, evento_id: int):
     return db.query(models.Evento).filter(models.Evento.id == evento_id).first()
@@ -54,7 +55,23 @@ def get_locais(db: Session, skip: int = 0, limit: int = 100):
 
 # Cria eventos e adiciona eles na tabela de eventos
 def create_evento(db: Session, evento: schemas.EventoCreate):
-    db_evento = models.Evento(**evento)
+    # Criar o evento a partir do esquema recebido
+    db_evento = models.Evento(
+        nome=evento.nome,
+        descricao=evento.descricao,
+        data=evento.data,
+        ehFormal=evento.ehFormal,
+        custoIngresso=evento.custoIngresso,
+        contato=evento.contato,
+        horaInicio=evento.horaInicio,
+        horaFim=evento.horaFim,
+        tipo_id=evento.tipo_id,
+    )
+
+    # Buscar os locais correspondentes e associar ao evento
+    locais = db.query(models.Local).filter(models.Local.id.in_(evento.local_id)).all()
+    db_evento.locais = locais  # Associar os locais ao evento
+
     db.add(db_evento)
     db.commit()
     db.refresh(db_evento)
@@ -158,5 +175,6 @@ def delete_local(db: Session, local_id: int):
     db.delete(db_local)
     db.commit()
     return {"message": "Local deleted successfully"}
+
 
 ########################################################################################################################################

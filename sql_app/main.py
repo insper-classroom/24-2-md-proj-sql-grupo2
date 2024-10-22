@@ -8,6 +8,7 @@ models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
 
+
 # Dependency para obter a sessão do banco de dados
 def get_db():
     db = SessionLocal()
@@ -18,6 +19,7 @@ def get_db():
 
 
 ################################################### CRUD para Locais ###################################################
+
 
 @app.post("/locais/", response_model=schemas.Local, tags=["Locais"])
 def create_local(local: schemas.LocalCreate, db: Session = Depends(get_db)):
@@ -41,11 +43,13 @@ def read_local(local_id: int, db: Session = Depends(get_db)):
 
 
 @app.put("/locais/{local_id}", response_model=schemas.Local, tags=["Locais"])
-def update_local(local_id: int, local: schemas.LocalUpdate, db: Session = Depends(get_db)):
+def update_local(
+    local_id: int, local: schemas.LocalUpdate, db: Session = Depends(get_db)
+):
     db_local = crud.get_local(db, local_id)
     if db_local is None:
         raise HTTPException(status_code=404, detail="Local não encontrado")
-    return crud.update_local(db, local_id, local.model_dump())
+    return crud.update_local(db, local_id, local=local)
 
 
 @app.delete("/locais/{local_id}", response_model=dict, tags=["Locais"])
@@ -67,7 +71,7 @@ def create_evento(evento: schemas.EventoCreate, db: Session = Depends(get_db)):
     db_evento = crud.get_evento_by_nome(db, evento.nome)
     if db_evento:
         raise HTTPException(status_code=400, detail="Evento já registrado")
-    return crud.create_evento(db, evento.model_dump())
+    return crud.create_evento(db, evento=evento)
 
 
 @app.get("/eventos/", response_model=list[schemas.Evento], tags=["Eventos"])
@@ -84,11 +88,13 @@ def read_evento(evento_id: int, db: Session = Depends(get_db)):
 
 
 @app.put("/eventos/{evento_id}", response_model=schemas.Evento, tags=["Eventos"])
-def update_evento(evento_id: int, evento: schemas.EventoUpdate, db: Session = Depends(get_db)):
+def update_evento(
+    evento_id: int, evento: schemas.EventoUpdate, db: Session = Depends(get_db)
+):
     db_evento = crud.get_evento(db, evento_id)
     if db_evento is None:
         raise HTTPException(status_code=404, detail="Evento não encontrado")
-    return crud.update_evento(db, evento_id, evento.model_dump())
+    return crud.update_evento(db, evento_id, evento=evento)
 
 
 @app.delete("/eventos/{evento_id}", response_model=dict, tags=["Eventos"])
@@ -110,7 +116,7 @@ def create_tipo(tipo: schemas.TipoCreate, db: Session = Depends(get_db)):
     db_tipo = crud.get_tipo_by_nome(db, tipo.nome)
     if db_tipo:
         raise HTTPException(status_code=400, detail="Tipo já registrado")
-    return crud.create_tipo(db, tipo.model_dump())
+    return crud.create_tipo(db, tipo=tipo.model_dump())
 
 
 @app.get("/tipos/", response_model=list[schemas.Tipo], tags=["Tipos"])
@@ -131,7 +137,7 @@ def update_tipo(tipo_id: int, tipo: schemas.TipoUpdate, db: Session = Depends(ge
     db_tipo = crud.get_tipo(db, tipo_id)
     if db_tipo is None:
         raise HTTPException(status_code=404, detail="Tipo não encontrado")
-    return crud.update_tipo(db, tipo_id, tipo.model_dump())
+    return crud.update_tipo(db, tipo_id, tipo=tipo)
 
 
 @app.delete("/tipos/{tipo_id}", response_model=dict, tags=["Tipos"])
@@ -140,5 +146,6 @@ def delete_tipo(tipo_id: int, db: Session = Depends(get_db)):
     if db_tipo is None:
         raise HTTPException(status_code=404, detail="Tipo não encontrado")
     return crud.delete_tipo(db, tipo_id)
+
 
 #######################################################################################################################

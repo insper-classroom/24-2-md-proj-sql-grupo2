@@ -11,16 +11,19 @@ class LocalBase(BaseModel):
     telefone: Optional[str] = None
     temEstacionamento: bool
     acessibilidade: bool
-    
+
 
 class LocalCreate(LocalBase):
     pass
+
 
 class Local(LocalBase):
     id: int
 
     class Config:
         from_attributes = True
+
+
 class LocalUpdate(BaseModel):
     nome: Optional[str] = None
     capacidade: Optional[int] = None
@@ -32,6 +35,7 @@ class LocalUpdate(BaseModel):
     class Config:
         from_attributes = True
 
+
 ########## Tipo de Evento ##########
 class TipoBase(BaseModel):
     nome: str
@@ -40,14 +44,18 @@ class TipoBase(BaseModel):
     objetivo: str
     ehPresencial: bool
 
+
 class TipoCreate(TipoBase):
     pass
+
 
 class Tipo(TipoBase):
     id: int
 
     class Config:
         from_attributes = True
+
+
 class TipoUpdate(BaseModel):
     nome: Optional[str] = None
     descricao: Optional[str] = None
@@ -57,6 +65,7 @@ class TipoUpdate(BaseModel):
 
     class Config:
         from_attributes = True
+
 
 ########## Evento ##########
 class EventoBase(BaseModel):
@@ -69,16 +78,20 @@ class EventoBase(BaseModel):
     horaInicio: datetime
     horaFim: datetime
     tipo_id: int
+
+
 class EventoCreate(EventoBase):
     local_id: List[int]
+
 
 class Evento(EventoBase):
     id: int
     locais: List[Local]
-    
 
     class Config:
         from_attributes = True
+
+
 class EventoUpdate(BaseModel):
     nome: Optional[str] = None
     descricao: Optional[str] = None
