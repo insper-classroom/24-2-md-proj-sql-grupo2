@@ -1,86 +1,94 @@
-# Dicionários pré-setados para teste dos dados de locais, tipos e eventos
+from sqlalchemy import text, create_engine
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import sessionmaker
+import os
+from dotenv import load_dotenv
 
-########## Locais ##########
-# Dicionário que simula um banco de dados de locais, com detalhes como nome, endereço, capacidade e acessibilidade
-local_db = {
-    1: {
-        "id": 1,
-        "nome": "Centro de Convenções",
-        "endereco": "Av. das Nações, 1234",
-        "capacidade": 500,
-        "telefone": "(11) 1234-5678",
-        "temEstacionamento": 1,  # 1 significa que tem estacionamento
-        "acessibilidade": 1,  # 1 significa que é acessível
-        "event_id": [1],  # Lista de eventos associados ao local
-    },
-    2: {
-        "id": 2,
-        "nome": "Espaço de Eventos do Campus",
-        "endereco": "Rua Universitária, 789",
-        "capacidade": 200,
-        "telefone": "(11) 8765-4321",
-        "temEstacionamento": 0,  # 0 significa que não tem estacionamento
-        "acessibilidade": 1,  # 1 significa que é acessível
-        "event_id": [2],  # Lista de eventos associados ao local
-    },
-}
+# Carrega as variáveis de ambiente do arquivo .env
+load_dotenv()
+DB_HOST = os.getenv("DB_HOST", "localhost")
+DB_USER = os.getenv("DB_USER", "root")
+DB_PASSWORD = os.getenv("DB_PASSWORD", "password")
+DB_NAME =  "meubanco4"
+Base = declarative_base()
+# Conexão com o banco de dados padrão (para PostgreSQL use "postgresql://")
+default_engine = create_engine("mysql+pymysql://{DB_HOST}:{DB_USER}!@{DB_PASSWORD}")
+# Nome do banco de dados que você quer criar
+database_name = "meubanco"
 
-########## Tipos ##########
-# Dicionário que simula um banco de dados de tipos de eventos, como palestras e oficinas
-tipo_db = {
-    1: {
-        "id": 1,
-        "nome": "Palestra",
-        "descricao": "Evento de caráter informativo com apresentação de palestrantes",
-        "publico_alvo": "Profissionais de tecnologia",  # Público alvo da palestra
-        "objetivo": "Disseminar conhecimento tecnológico",  # Objetivo da palestra
-        "ehPresencial": 1,  # 1 significa que é um evento presencial
-    },
-    2: {
-        "id": 2,
-        "nome": "Oficina",
-        "descricao": "Treinamento prático com participação ativa",
-        "publico_alvo": "Desenvolvedores iniciantes",  # Público alvo da oficina
-        "objetivo": "Ensinar boas práticas de desenvolvimento",  # Objetivo da oficina
-        "ehPresencial": 1,  # 1 significa que é um evento presencial
-    },
-}
+# Criação do banco de dados se não existir
+with default_engine.begin() as conn:
+    conn.execute(text(f"CREATE DATABASE IF NOT EXISTS {database_name}"))
 
-########## Eventos ##########
-# Dicionário que simula um banco de dados de eventos, incluindo detalhes como data, horários e locais
-evento_db = {
-    1: {
-        "id": 1,
-        "nome": "Tech Talk 2024",
-        "descricao": "Discussões sobre tendências tecnológicas",
-        "data": "2024-11-15",  # Data do evento
-        "ehFormal": 0,  # 0 significa que o evento não é formal
-        "custoIngresso": 100,  # Preço médio do ingresso
-        "contato": "techtalk@eventos.com",  # Contato de email do evento
-        "horaInicio": "10:00",  # Horário de início do evento
-        "horaFim": "12:00",  # Horário de término do evento
-        "local_id": [1],  # Locais associados ao evento (pode ter mais de um local)
-        "tipo_id": 1,  # ID do tipo de evento, neste caso uma palestra
-    },
-    2: {
-        "id": 2,
-        "nome": "Workshop de Programação",
-        "descricao": "Oficina prática de programação",
-        "data": "2024-12-01",  # Data do evento
-        "ehFormal": 0,  # 0 significa que o evento não é formal
-        "custoIngresso": 50,  # Preço médio do ingresso
-        "contato": "workshop@eventos.com",  # Contato de email do evento
-        "horaInicio": "14:00",  # Horário de início do evento
-        "horaFim": "17:00",  # Horário de término do evento
-        "local_id": [2],  # Locais associados ao evento (pode ter mais de um local)
-        "tipo_id": 2,  # ID do tipo de evento, neste caso uma oficina
-    },
-}
+# Conecte-se ao banco de dados recém-criado
+engine = create_engine(f"mysql+pymysql://{DB_HOST}:{DB_USER}!@{DB_PASSWORD}/{database_name}")
+SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+# Criação das tabelas no novo banco de dados
+with engine.begin() as conn:
+    # Cria a tabela 'locais'
+    conn.execute(text("""
+        CREATE TABLE IF NOT EXISTS locais (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            nome VARCHAR(255) NOT NULL,
+            endereco VARCHAR(255) NOT NULL,
+            capacidade INT NOT NULL,
+            telefone VARCHAR(20),
+            temEstacionamento BOOLEAN NOT NULL DEFAULT FALSE,
+            acessibilidade BOOLEAN NOT NULL DEFAULT FALSE,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+        );
+    """))
 
-########## Contadores ##########
-# Contadores para simular auto incremento de IDs de locais, tipos e eventos
-# Quando um novo local, tipo ou evento é criado, o ID será gerado com base nesses contadores
+    # Cria a tabela 'tipo_evento'
+    conn.execute(text("""
+        CREATE TABLE IF NOT EXISTS tipo_evento (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            nome VARCHAR(255) NOT NULL,
+            descricao VARCHAR(255) NOT NULL,
+            publico_alvo VARCHAR(255) NOT NULL,
+            objetivo VARCHAR(255) NOT NULL,
+            ehPresencial BOOLEAN NOT NULL DEFAULT TRUE,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+        );
+    """))
 
-local_id_counter = 3  # Contador de IDs de locais, começando do 3
-tipo_id_counter = 3  # Contador de IDs de tipos, começando do 3
-evento_id_counter = 3  # Contador de IDs de eventos, começando do 3
+    # Cria a tabela 'eventos'
+    conn.execute(text("""
+        CREATE TABLE IF NOT EXISTS eventos (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            nome VARCHAR(255) NOT NULL,
+            descricao VARCHAR(255) NOT NULL,
+            data DATE NOT NULL,
+            ehFormal BOOLEAN NOT NULL DEFAULT FALSE,
+            custoIngresso INT NOT NULL,
+            contato VARCHAR(20) NOT NULL,
+            horaInicio TIME NOT NULL,
+            horaFim TIME NOT NULL,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+        );
+    """))
+
+    # Cria a tabela de associação entre eventos e locais (many-to-many)
+    conn.execute(text("""
+        CREATE TABLE IF NOT EXISTS evento_local (
+            evento_id INT,
+            local_id INT,
+            PRIMARY KEY (evento_id, local_id),
+            FOREIGN KEY (evento_id) REFERENCES eventos(id) ON DELETE CASCADE,
+            FOREIGN KEY (local_id) REFERENCES locais(id) ON DELETE CASCADE
+        );
+    """))
+
+    # Cria a tabela de associação entre eventos e tipos de evento (many-to-many)
+    conn.execute(text("""
+        CREATE TABLE IF NOT EXISTS evento_tipo (
+            evento_id INT,
+            tipo_id INT,
+            PRIMARY KEY (evento_id, tipo_id),
+            FOREIGN KEY (evento_id) REFERENCES eventos(id) ON DELETE CASCADE,
+            FOREIGN KEY (tipo_id) REFERENCES tipo_evento(id) ON DELETE CASCADE
+        );
+    """))

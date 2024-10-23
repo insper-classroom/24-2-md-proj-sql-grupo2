@@ -1,214 +1,162 @@
-# dicionários para armazenar dados temporários
-from .database import *
+from sqlalchemy.orm import Session
+from . import models, schemas
+
 
 ################################################################ READ ################################################################
 
-
 # Retorna o evento de ID especificado:
-def get_evento(evento_id: int):
-    if evento_id not in evento_db:
-        raise ValueError("Evento not found")
-
-    return evento_db[evento_id]
+def get_evento(db: Session, evento_id: int):
+    return db.query(models.Evento).filter(models.Evento.id == evento_id).first()
 
 
 # Retorna o tipo de evento pelo ID específico
-def get_tipo(tipo_id: int):
-
-    if tipo_id not in tipo_db:
-        raise ValueError("Tipo not found")
-
-    return tipo_db[tipo_id]
+def get_tipo(db: Session, tipo_id: int):
+    return db.query(models.Tipo).filter(models.Tipo.id == tipo_id).first()
 
 
 # Retorna o local do evento pelo ID específico
-def get_local(local_id: int):
-
-    if local_id not in local_db:
-        raise ValueError("Local not found")
-
-    return local_db[local_id]
+def get_local(db: Session, local_id: int):
+    return db.query(models.Local).filter(models.Local.id == local_id).first()
 
 
-# Retorna o evento de nome especificado, caso não exista nenhum evento com esse nome retorna "None"
-def get_evento_by_nome(evento_nome: str):
-    for evento in evento_db.values():
-        if evento["nome"] == evento_nome:
-            return evento
-    return None
+# Retorna o evento de nome especificado, caso não exista nenhum evento com esse nome retorna None
+def get_evento_by_nome(db: Session, evento_nome: str):
+    return db.query(models.Evento).filter(models.Evento.nome == evento_nome).first()
 
 
-# Retorna o tipo de nome especificado, caso não exista nenhum tipo com esse nome retorna "None"
-def get_tipo_by_nome(tipo_nome: str):
-    for tipo in tipo_db.values():
-        if tipo["nome"] == tipo_nome:
-            return tipo
-    return None
+# Retorna o tipo de nome especificado, caso não exista nenhum tipo com esse nome retorna None
+def get_tipo_by_nome(db: Session, tipo_nome: str):
+    return db.query(models.Tipo).filter(models.Tipo.nome == tipo_nome).first()
 
 
-# Retorna o local de nome especificado, caso não exista nenhum local com esse nome retorna "None"
-def get_local_by_nome(local_nome: str):
-    for local in local_db.values():
-        if local["nome"] == local_nome:
-            return local
-    return None
+# Retorna o local de nome especificado, caso não exista nenhum local com esse nome retorna None
+def get_local_by_nome(db: Session, local_nome: str):
+    return db.query(models.Local).filter(models.Local.nome == local_nome).first()
 
 
-# Retorna todos os 100 primeiros eventos armazenados na tabela
-def get_eventos(skip: int = 0, limit: int = 100):
-    return list(evento_db.values())[skip : skip + limit]
+# Retorna todos os eventos armazenados na tabela, com limite e skip
+def get_eventos(db: Session, skip: int = 0, limit: int = 100):
+    return db.query(models.Evento).offset(skip).limit(limit).all()
 
 
-# Retorna os 100 primeiros tipos armazenados na tabela
-def get_tipos(skip: int = 0, limit: int = 100):
-    return list(tipo_db.values())[skip : skip + limit]
+# Retorna os tipos armazenados na tabela, com limite e skip
+def get_tipos(db: Session, skip: int = 0, limit: int = 100):
+    return db.query(models.Tipo).offset(skip).limit(limit).all()
 
 
-# Retorna os 100 primeiros locais armazenados na tabela
-def get_locais(skip: int = 0, limit: int = 100):
-    return list(local_db.values())[skip : skip + limit]
+# Retorna os locais armazenados na tabela, com limite e skip
+def get_locais(db: Session, skip: int = 0, limit: int = 100):
+    return db.query(models.Local).offset(skip).limit(limit).all()
 
-
-########################################################################################################################################
 
 ################################################################ CREATE ################################################################
 
 
 # Cria eventos e adiciona eles na tabela de eventos
-def create_evento(evento: dict):
-    global evento_id_counter
-    new_evento = {
-        "id": evento_id_counter,
-        "nome": evento["nome"],
-        "descricao": evento["descricao"],
-        "data": evento["data"],
-        "ehFormal": evento["ehFormal"],
-        "custoIngresso": evento["custoIngresso"],
-        "contato": evento["contato"],
-        "horaInicio": evento["horaInicio"],
-        "horaFim": evento["horaFim"],
-        "local_id": evento["local_id"],
-        "tipo_id": evento["tipo_id"],
-    }
-    evento_db[evento_id_counter] = new_evento
-    evento_id_counter += 1
-    return new_evento
+def create_evento(db: Session, evento: schemas.EventoCreate):
+    db_evento = models.Evento(**evento)
+    db.add(db_evento)
+    db.commit()
+    db.refresh(db_evento)
+    return db_evento
 
 
 # Cria tipos e adiciona eles na tabela de tipos
-def create_tipo(tipo: dict):
-    global tipo_id_counter
-    new_tipo = {
-        "id": tipo_id_counter,
-        "nome": tipo["nome"],
-        "descricao": tipo["descricao"],
-        "publico_alvo": tipo["publico_alvo"],
-        "objetivo": tipo["objetivo"],
-        "ehPresencial": tipo["ehPresencial"],
-    }
-    tipo_db[tipo_id_counter] = new_tipo
-    tipo_id_counter += 1
-    return new_tipo
+def create_tipo(db: Session, tipo: schemas.TipoCreate):
+    db_tipo = models.Tipo(**tipo)
+    db.add(db_tipo)
+    db.commit()
+    db.refresh(db_tipo)
+    return db_tipo
 
 
 # Cria locais e adiciona eles na tabela de locais
-def create_local(local: dict):
-    global local_id_counter
-    new_local = {
-        "id": local_id_counter,
-        "nome": local["nome"],
-        "endereco": local["endereco"],
-        "capacidade": local["capacidade"],
-        "telefone": local["telefone"],
-        "temEstacionamento": local["temEstacionamento"],
-        "acessibilidade": local["acessibilidade"],
-        "event_id": local["event_id"],
-    }
-    local_db[local_id_counter] = new_local
-    local_id_counter += 1
-    return new_local
+def create_local(db: Session, local: schemas.LocalCreate):
+    db_local = models.Local(**local)
+    db.add(db_local)
+    db.commit()
+    db.refresh(db_local)
+    return db_local
 
-
-########################################################################################################################################
 
 ################################################################ UPDATE ################################################################
 
 
-# Atualiza os dados de um evento que já exista na tabela
-def update_evento(evento_id: int, evento: dict):
-    if evento_id not in evento_db:
-        raise ValueError("Evento not found")
+# Atualiza os dados de um evento que já existe na tabela
+def update_evento(db: Session, evento_id: int, evento: schemas.EventoUpdate):
+    db_evento = db.query(models.Evento).filter(models.Evento.id == evento_id).first()
+    if not db_evento:
+        return None
 
-    for key, value in evento.items():
-        print(key, value)
-        if key == "local_id" and value != None:
-            evento_db[evento_id]["local_id"] = value
+    for key, value in evento.dict(exclude_unset=True).items():
+        setattr(db_evento, key, value)
 
-        # Atualiza o tipo_id se for válido
-        elif key == "tipo_id" and value != None:
-            evento_db[evento_id]["tipo_id"] = value
-
-        # Atualiza qualquer outro campo do evento
-        else:
-            if value != None:
-                evento_db[evento_id][key] = value
-
-    return evento_db[evento_id]
+    db.commit()
+    db.refresh(db_evento)
+    return db_evento
 
 
 # Atualiza os dados de um tipo que já existe na tabela
-def update_tipo(tipo_id: int, tipo: dict):
-    if tipo_id not in tipo_db:
-        raise ValueError("tipo not found")
+def update_tipo(db: Session, tipo_id: int, tipo: schemas.TipoUpdate):
+    db_tipo = db.query(models.Tipo).filter(models.Tipo.id == tipo_id).first()
+    if not db_tipo:
+        return None
 
-    for key, value in tipo.items():
-        if value != None:
-            tipo_db[tipo_id][key] = value
+    for key, value in tipo.dict(exclude_unset=True).items():
+        setattr(db_tipo, key, value)
 
-    return tipo_db[tipo_id]
-
-
-# Atualiza os dados de um local já existente na tabela
-def update_local(local_id: int, local: dict):
-    if local_id not in local_db:
-        raise ValueError("local not found")
-
-    for key, value in local.items():
-        if value != None:
-            local_db[local_id][key] = value
-    return local_db[local_id]
+    db.commit()
+    db.refresh(db_tipo)
+    return db_tipo
 
 
-########################################################################################################################################
+# Atualiza os dados de um local que já existe na tabela
+def update_local(db: Session, local_id: int, local: schemas.LocalUpdate):
+    db_local = db.query(models.Local).filter(models.Local.id == local_id).first()
+    if not db_local:
+        return None
+
+    for key, value in local.dict(exclude_unset=True).items():
+        setattr(db_local, key, value)
+
+    db.commit()
+    db.refresh(db_local)
+    return db_local
+
 
 ################################################################ DELETE ################################################################
 
 
 # Deleta um evento já existente na tabela
-def delete_evento(evento_id: int):
-    if evento_id not in evento_db:
-        raise ValueError("Evento not found")
+def delete_evento(db: Session, evento_id: int):
+    db_evento = db.query(models.Evento).filter(models.Evento.id == evento_id).first()
+    if not db_evento:
+        return None
 
-    del evento_db[evento_id]
+    db.delete(db_evento)
+    db.commit()
     return {"message": "Evento deleted successfully"}
 
 
 # Deleta um tipo já existente na tabela
-def delete_tipo(tipo_id: int):
-    if tipo_id not in tipo_db:
-        raise ValueError("Tipo not found")
+def delete_tipo(db: Session, tipo_id: int):
+    db_tipo = db.query(models.Tipo).filter(models.Tipo.id == tipo_id).first()
+    if not db_tipo:
+        return None
 
-    del tipo_db[tipo_id]
+    db.delete(db_tipo)
+    db.commit()
     return {"message": "Tipo deleted successfully"}
 
 
 # Deleta um local já existente na tabela
-def delete_local(local_id: int):
-    if local_id not in local_db:
-        raise ValueError("Local not found")
+def delete_local(db: Session, local_id: int):
+    db_local = db.query(models.Local).filter(models.Local.id == local_id).first()
+    if not db_local:
+        return None
 
-    del local_db[local_id]
+    db.delete(db_local)
+    db.commit()
     return {"message": "Local deleted successfully"}
-
 
 ########################################################################################################################################
