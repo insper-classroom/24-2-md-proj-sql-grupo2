@@ -61,7 +61,7 @@ class LocalUpdate(BaseModel):
         None,
         title="Nome do Local",
         description="Nome do local onde o evento será realizado.",
-        example="MorumBis",
+        example="Estádio do Morumbi",
     )
     capacidade: Optional[int] = Field(
         None,
@@ -73,7 +73,7 @@ class LocalUpdate(BaseModel):
         None,
         title="Endereço",
         description="Endereço completo do local.",
-        example="Rua X, 123",
+        example="Praça Roberto Gomes Pedrosa, 1 - Morumbi, São Paulo - SP, 05653-070",
     )
     telefone: Optional[str] = Field(
         None,

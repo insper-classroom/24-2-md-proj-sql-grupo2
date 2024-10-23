@@ -102,18 +102,3 @@ with engine.begin() as conn:
     """
         )
     )
-
-    # Cria a tabela de associação entre eventos e tipos de evento (many-to-many)
-    conn.execute(
-        text(
-            """
-        CREATE TABLE IF NOT EXISTS evento_tipo (
-            evento_id INT,
-            tipo_id INT,
-            PRIMARY KEY (evento_id, tipo_id),
-            FOREIGN KEY (evento_id) REFERENCES eventos(id) ON DELETE CASCADE,
-            FOREIGN KEY (tipo_id) REFERENCES tipo(id) ON DELETE CASCADE
-        );
-    """
-        )
-    )
